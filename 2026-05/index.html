@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>倍宠 · 直播间维度复盘报告</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif; background: #F5F7FA; color: #1D2129; line-height: 1.6; }
+  .container { max-width: 1200px; margin: 0 auto; padding: 24px; }
+  
+  /* Header */
+  .header { background: linear-gradient(135deg, #296BEF 0%, #0B4FD9 100%); color: white; border-radius: 12px; padding: 32px 40px; margin-bottom: 24px; }
+  .header h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+  .header .subtitle { font-size: 14px; opacity: 0.85; }
+  .header .meta { display: flex; gap: 32px; margin-top: 16px; font-size: 13px; opacity: 0.9; }
+  .header .meta span { display: flex; align-items: center; gap: 6px; }
+  
+  /* Card */
+  .card { background: white; border-radius: 10px; padding: 24px 28px; margin-bottom: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+  .card-title { font-size: 18px; font-weight: 700; color: #1D2129; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2px solid #296BEF; display: flex; align-items: center; gap: 8px; }
+  .card-title .icon { width: 4px; height: 20px; background: #296BEF; border-radius: 2px; }
+  
+  /* KPI Grid */
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px; }
+  .kpi-card { background: white; border-radius: 10px; padding: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); text-align: center; }
+  .kpi-card .label { font-size: 12px; color: #86909C; margin-bottom: 8px; }
+  .kpi-card .value { font-size: 24px; font-weight: 700; color: #1D2129; }
+  .kpi-card .change { font-size: 12px; margin-top: 6px; font-weight: 600; }
+  .kpi-card .change.up { color: #FF6D5E; }
+  .kpi-card .change.down { color: #76C84D; }
+  .kpi-card .change.up-good { color: #76C84D; }
+  .kpi-card .change.down-bad { color: #FF6D5E; }
+  .kpi-card .benchmark { font-size: 11px; color: #86909C; margin-top: 4px; }
+  
+  /* Table */
+  .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .data-table th { background: #296BEF; color: white; padding: 10px 12px; text-align: center; font-weight: 600; white-space: nowrap; }
+  .data-table td { padding: 10px 12px; border-bottom: 1px solid #E8E8E8; text-align: center; }
+  .data-table tr:hover { background: #F7F9FC; }
+  .data-table .left { text-align: left; }
+  .data-table .bold { font-weight: 700; }
+  .data-table .positive { color: #FF6D5E; }
+  .data-table .negative { color: #76C84D; }
+  .data-table .warn { color: #FF6D5E; font-weight: 600; }
+  .data-table .good { color: #76C84D; font-weight: 600; }
+  
+  /* Bar */
+  .bar-cell { position: relative; min-width: 80px; }
+  .bar-bg { position: absolute; left: 0; top: 0; height: 100%; background: rgba(62,121,240,0.12); border-radius: 2px; }
+  .bar-text { position: relative; z-index: 1; }
+  
+  /* Insight Box */
+  .insight-box { background: #F0F5FF; border-left: 4px solid #296BEF; padding: 16px 20px; margin: 16px 0; border-radius: 0 8px 8px 0; font-size: 14px; line-height: 1.8; }
+  .insight-box .title { font-weight: 700; color: #296BEF; margin-bottom: 6px; }
+  .insight-box.warn { background: #FFF7E6; border-left-color: #FFAE19; }
+  .insight-box.warn .title { color: #D48806; }
+  .insight-box.danger { background: #FFF1F0; border-left-color: #FF4D4F; }
+  .insight-box.danger .title { color: #CF1322; }
+  .insight-box.success { background: #F0FFF4; border-left-color: #52C41A; }
+  .insight-box.success .title { color: #389E0D; }
+  
+  /* Comparison Table */
+  .comp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .comp-card { background: #FAFBFC; border-radius: 8px; padding: 16px; border: 1px solid #E8E8E8; }
+  .comp-card .comp-title { font-size: 14px; font-weight: 700; margin-bottom: 12px; color: #296BEF; }
+  
+  /* Tag */
+  .tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+  .tag.red { background: #FFF1F0; color: #CF1322; }
+  .tag.green { background: #F0FFF4; color: #389E0D; }
+  .tag.blue { background: #F0F5FF; color: #296BEF; }
+  .tag.orange { background: #FFF7E6; color: #D48806; }
+  
+  /* Section */
+  .section { margin-bottom: 8px; }
+  
+  /* Scrollable table */
+  .table-scroll { overflow-x: auto; }
+  
+  /* Footer */
+  .footer { text-align: center; color: #86909C; font-size: 12px; padding: 24px 0; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- Header -->
+<div class="header">
+  <h1>倍宠 · 直播间维度复盘报告</h1>
+  <div class="subtitle">直播链路 · 竞价广告 · 14天环比分析</div>
+  <div class="meta">
+    <span>📅 本期：2026/05/25 — 2026/06/07</span>
+    <span>📅 环比：2026/05/11 — 2026/05/24</span>
+    <span>📊 对标：家电数码组 · 白牌 · 直播</span>
+  </div>
+</div>
+
+<!-- 一、宏观总览 -->
+<div class="card">
+  <div class="card-title"><div class="icon"></div>一、宏观总览</div>
+  
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="label">日均消耗(万元)</div>
+      <div class="value">37.6</div>
+      <div class="change down">环比 44.8 → -16.2%</div>
+      <div class="benchmark">大盘 +20.9%</div>
+    </div>
+    <div class="kpi-card">
+      <div class="label">下单ROI</div>
+      <div class="value">2.56</div>
+      <div class="change up-good">环比 2.44 → +5.0%</div>
+      <div class="benchmark">大盘 2.72 / 大盘 -8.0%</div>
+    </div>
+    <div class="kpi-card">
+      <div class="label">全量GMV(万元)</div>
+      <div class="value">1,349.2</div>
+      <div class="change down-bad">环比 1,532.2 → -11.9%</div>
+      <div class="benchmark">大盘 +21.3%</div>
+    </div>
+    <div class="kpi-card">
+      <div class="label">计价率</div>
+      <div class="value">1.151</div>
+      <div class="change up">环比 1.131 → +1.8%</div>
+      <div class="benchmark">大盘 1.102</div>
+    </div>
+  </div>
+  
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="label">CPM(元)</div>
+      <div class="value">89.35</div>
+      <div class="change down">环比 96.90 → -7.8%</div>
+      <div class="benchmark">大盘 62.34 / 大盘 -4.1%</div>
+    </div>
+    <div class="kpi-card">
+      <div class="label">CTR(%)</div>
+      <div class="value">3.05</div>
+      <div class="change up-good">环比 2.73 → +11.8%</div>
+      <div class="benchmark">大盘 2.40%</div>
+    </div>
+    <div class="kpi-card">
+      <div class="label">CVR(%)</div>
+      <div class="value">3.42</div>
+      <div class="change down-bad">环比 4.57 → -25.2%</div>
+      <div class="benchmark">大盘 4.69%</div>
+    </div>
+    <div class="kpi-card">
+      <div class="label">客单价(元)</div>
+      <div class="value">219.83</div>
+      <div class="change up">环比 189.68 → +15.9%</div>
+      <div class="benchmark">大盘 170.23</div>
+    </div>
+  </div>
+
+  <div class="insight-box danger">
+    <div class="title">⚠️ 核心发现：消耗缩量 + CVR大幅下滑，与大盘走势背离</div>
+    本期消耗526.1万，环比下降16.2%，而大盘同期消耗增长20.9%，客户投放力度明显收缩。<br>
+    ROI虽提升5.0%至2.56，但低于大盘2.72，主要受益于CTR提升(+11.8%)和CPM下降(-7.8%)，而非转化效率改善。<br>
+    CVR从4.57%骤降至3.42%(-25.2%)，是本期最大风险点，与大盘CVR上升8.8%形成鲜明对比。<br>
+    计价率1.151高于大盘1.102，ROI提升空间受限。
+  </div>
+</div>
+
+<!-- 二、日耗趋势 -->
+<div class="card">
+  <div class="card-title"><div class="icon"></div>二、日耗趋势</div>
+  <div style="margin: 16px 0; border-radius: 8px; overflow: hidden; border: 1px solid #E8E8E8;">
+    <div>                        <script type="text/javascript">window.PlotlyConfig = {MathJaxConfig: 'local'};</script>
+        <script charset="utf-8" src="https://cdn.plot.ly/plotly-3.2.0.min.js" integrity="sha256-iZ2u/oU2wf/vDbl/ChcX93WgbBRSBvUO6N413hDz7xM=" crossorigin="anonymous"></script>                <div id="beichong-daily-trend" class="plotly-graph-div" style="height:100%; width:100%;"></div>            <script type="text/javascript">                window.PLOTLYENV=window.PLOTLYENV || {};                                if (document.getElementById("beichong-daily-trend")) {                    Plotly.newPlot(                        "beichong-daily-trend",                        [{"hovertemplate":"本期 %{x}\u003cbr\u003e消耗: %{y:.1f}万\u003cextra\u003e\u003c\u002fextra\u003e","marker":{"color":"#296BEF"},"name":"本期消耗(万)","text":["63.1","73.5","40.2","39.0","21.5","22.7","22.6","30.8","39.2","59.6","33.2","31.8","25.3","23.8"],"textfont":{"color":"#296BEF","size":11},"textposition":"outside","x":["05\u002f25","05\u002f26","05\u002f27","05\u002f28","05\u002f29","05\u002f30","05\u002f31","06\u002f01","06\u002f02","06\u002f03","06\u002f04","06\u002f05","06\u002f06","06\u002f07"],"y":{"dtype":"f8","bdata":"cgkv3b6GT0D\u002f354I3l1SQMd5FrwcHERACX\u002fnYLt\u002fQ0DgJgb163w1QMvdXgeLqTZATZc60l2PNkBqqsTIVMA+QF5JX\u002fnNmUNAIqhmSyDQTUBM2B7A2ZhAQLfebPzUxD9AurHJr1lMOUAd3lrDGM43QA=="},"type":"bar"},{"hovertemplate":"环比 %{x}\u003cbr\u003e消耗: %{y:.1f}万\u003cextra\u003e\u003c\u002fextra\u003e","marker":{"color":"#B8D0FF"},"name":"环比消耗(万)","text":["32.3","56.3","109.5","48.3","55.0","64.1","61.0","39.3","26.1","27.6","15.4","18.4","18.9","55.2"],"textfont":{"color":"#86909C","size":10},"textposition":"outside","x":["05\u002f11","05\u002f12","05\u002f13","05\u002f14","05\u002f15","05\u002f16","05\u002f17","05\u002f18","05\u002f19","05\u002f20","05\u002f21","05\u002f22","05\u002f23","05\u002f24"],"y":{"dtype":"f8","bdata":"fede+jMsQECeD9TL3SpMQFLg8MRkYltASXax2AIhSECzr7YOgIFLQNZG5NeJBVBAae\u002f7U4SETkB8V7Zva6JDQOBufgCoHDpATfiO4miSO0BQAPBI79kuQEQGh1HvcjJArZoLT3TqMkB2MKl0TJpLQA=="},"type":"bar"},{"hovertemplate":"%{x}\u003cbr\u003e环比变化: %{y:.1f}%\u003cextra\u003e\u003c\u002fextra\u003e","line":{"color":"#FF6D5E","dash":"dot","width":2.5},"marker":{"color":"#FF6D5E","size":7,"symbol":"diamond"},"mode":"lines+markers","name":"环比变化率(%)","x":["05\u002f25","05\u002f26","05\u002f27","05\u002f28","05\u002f29","05\u002f30","05\u002f31","06\u002f01","06\u002f02","06\u002f03","06\u002f04","06\u002f05","06\u002f06","06\u002f07"],"y":{"dtype":"f8","bdata":"yKhVLOe7V0CrUPmLHWk+QDj\u002f2AUipE\u002fAjPPIIkUwM8A0wcs\u002fOnhOwAE1MBjVKFDAYxySe9SET8Cz4pqtwrA1wDh7sNiDEElAidLZb2YQXUAhhCUTB8xcQF4lSFu3DFJAwzRfc9veQECV2YTWh3BMwA=="},"yaxis":"y2","type":"scatter"}],                        {"template":{"data":{"barpolar":[{"marker":{"line":{"color":"white","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"barpolar"}],"bar":[{"error_x":{"color":"#2a3f5f"},"error_y":{"color":"#2a3f5f"},"marker":{"line":{"color":"white","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"bar"}],"carpet":[{"aaxis":{"endlinecolor":"#296BEF","gridcolor":"#CBDCFE","linecolor":"#CBDCFE","minorgridcolor":"#CBDCFE","startlinecolor":"#296BEF"},"baxis":{"endlinecolor":"#296BEF","gridcolor":"#CBDCFE","linecolor":"#CBDCFE","minorgridcolor":"#CBDCFE","startlinecolor":"#296BEF"},"type":"carpet"}],"choropleth":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"choropleth"}],"contourcarpet":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"contourcarpet"}],"contour":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#F2F6FE"],[0.1111111111111111,"#CBDCFE"],[0.2222222222222222,"#A6C3FF"],[0.3333333333333333,"#80AAFF"],[0.4444444444444444,"#4080FF"],[0.5555555555555556,"#296BEF"],[0.6666666666666666,"#0B4FD9"],[0.7777777777777778,"#0941B3"],[0.8888888888888888,"#002F8C"],[1.0,"#002266"]],"type":"contour"}],"heatmap":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#F2F6FE"],[0.1111111111111111,"#CBDCFE"],[0.2222222222222222,"#A6C3FF"],[0.3333333333333333,"#80AAFF"],[0.4444444444444444,"#4080FF"],[0.5555555555555556,"#296BEF"],[0.6666666666666666,"#0B4FD9"],[0.7777777777777778,"#0941B3"],[0.8888888888888888,"#002F8C"],[1.0,"#002266"]],"type":"heatmap"}],"histogram2dcontour":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#F2F6FE"],[0.1111111111111111,"#CBDCFE"],[0.2222222222222222,"#A6C3FF"],[0.3333333333333333,"#80AAFF"],[0.4444444444444444,"#4080FF"],[0.5555555555555556,"#296BEF"],[0.6666666666666666,"#0B4FD9"],[0.7777777777777778,"#0941B3"],[0.8888888888888888,"#002F8C"],[1.0,"#002266"]],"type":"histogram2dcontour"}],"histogram2d":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#F2F6FE"],[0.1111111111111111,"#CBDCFE"],[0.2222222222222222,"#A6C3FF"],[0.3333333333333333,"#80AAFF"],[0.4444444444444444,"#4080FF"],[0.5555555555555556,"#296BEF"],[0.6666666666666666,"#0B4FD9"],[0.7777777777777778,"#0941B3"],[0.8888888888888888,"#002F8C"],[1.0,"#002266"]],"type":"histogram2d"}],"histogram":[{"marker":{"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"histogram"}],"mesh3d":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"mesh3d"}],"parcoords":[{"line":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"parcoords"}],"pie":[{"automargin":true,"type":"pie"}],"scatter3d":[{"line":{"colorbar":{"outlinewidth":0,"ticks":""}},"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatter3d"}],"scattercarpet":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattercarpet"}],"scattergeo":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattergeo"}],"scattergl":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattergl"}],"scattermapbox":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattermapbox"}],"scattermap":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattermap"}],"scatterpolargl":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterpolargl"}],"scatterpolar":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterpolar"}],"scatter":[{"fillpattern":{"fillmode":"overlay","size":10,"solidity":0.2},"type":"scatter"}],"scatterternary":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterternary"}],"surface":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#F2F6FE"],[0.1111111111111111,"#CBDCFE"],[0.2222222222222222,"#A6C3FF"],[0.3333333333333333,"#80AAFF"],[0.4444444444444444,"#4080FF"],[0.5555555555555556,"#296BEF"],[0.6666666666666666,"#0B4FD9"],[0.7777777777777778,"#0941B3"],[0.8888888888888888,"#002F8C"],[1.0,"#002266"]],"type":"surface"}],"table":[{"cells":{"fill":{"color":"#F7F8FA"},"line":{"color":"white"}},"header":{"fill":{"color":"#296BEF"},"line":{"color":"white"}},"type":"table"}]},"layout":{"annotationdefaults":{"arrowcolor":"#2a3f5f","arrowhead":0,"arrowwidth":1},"autotypenumbers":"strict","coloraxis":{"colorbar":{"outlinewidth":0,"ticks":""}},"colorscale":{"diverging":[[0,"#E63D2E"],[0.1,"#FF4F40"],[0.2,"#FF8A80"],[0.3,"#FFADA6"],[0.4,"#FFD0CC"],[0.5,"#F2F4F7"],[0.6,"#CBDCFE"],[0.7,"#A6C3FF"],[0.8,"#80AAFF"],[0.9,"#4080FF"],[1,"#296BEF"]],"sequential":[[0.0,"#F2F6FE"],[0.1111111111111111,"#CBDCFE"],[0.2222222222222222,"#A6C3FF"],[0.3333333333333333,"#80AAFF"],[0.4444444444444444,"#4080FF"],[0.5555555555555556,"#296BEF"],[0.6666666666666666,"#0B4FD9"],[0.7777777777777778,"#0941B3"],[0.8888888888888888,"#002F8C"],[1.0,"#002266"]],"sequentialminus":[[0.0,"#F2F6FE"],[0.1111111111111111,"#CBDCFE"],[0.2222222222222222,"#A6C3FF"],[0.3333333333333333,"#80AAFF"],[0.4444444444444444,"#4080FF"],[0.5555555555555556,"#296BEF"],[0.6666666666666666,"#0B4FD9"],[0.7777777777777778,"#0941B3"],[0.8888888888888888,"#002F8C"],[1.0,"#002266"]]},"colorway":["#3E79F0","#FFAE19","#76C84D","#8E84FD","#11CFCF","#FF66AD","#61C2FF","#B654D6","#575BD9","#F76852"],"font":{"color":"#2a3f5f","family":"Arial","size":12},"geo":{"bgcolor":"white","lakecolor":"white","landcolor":"white","showlakes":true,"showland":true,"subunitcolor":"#C8D4E3"},"hoverlabel":{"align":"left"},"hovermode":"closest","mapbox":{"style":"light"},"paper_bgcolor":"white","plot_bgcolor":"white","polar":{"angularaxis":{"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":""},"bgcolor":"white","radialaxis":{"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":""}},"scene":{"xaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"},"yaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"},"zaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"}},"shapedefaults":{"line":{"color":"#2a3f5f"}},"ternary":{"aaxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""},"baxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""},"bgcolor":"white","caxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""}},"title":{"x":0.05},"xaxis":{"automargin":true,"exponentformat":"none","gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":"","title":{"standoff":15},"zerolinecolor":"#EBF0F8","zerolinewidth":2},"yaxis":{"automargin":true,"exponentformat":"none","gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":"","title":{"standoff":15},"zerolinecolor":"#EBF0F8","zerolinewidth":2}}},"annotations":[{"arrowcolor":"#D48806","arrowhead":2,"arrowsize":1,"ax":40,"ay":-60,"bgcolor":"#FFFBE6","bordercolor":"#D48806","borderwidth":1,"font":{"color":"#D48806","size":11},"opacity":0.95,"showarrow":true,"text":"🔺 高峰 73.5万\u003cbr\u003eROI=2.62 CVR=3.1%\u003cbr\u003eCPM=85 环比+30%\u003cbr\u003e创维普澈占77.5%\u003cbr\u003e单链路智投71.8%","x":"05\u002f26","y":78.46667685999999},{"arrowcolor":"#CF1322","arrowhead":2,"arrowsize":1,"ax":-40,"ay":-50,"bgcolor":"#FFF1F0","bordercolor":"#CF1322","borderwidth":1,"font":{"color":"#CF1322","size":11},"opacity":0.95,"showarrow":true,"text":"🔻 低谷 21.5万\u003cbr\u003eROI=2.34 CVR=2.9%\u003cbr\u003eCPM=70 环比-61%\u003cbr\u003e计价率1.21偏高\u003cbr\u003e非智投占比18.7%","x":"05\u002f29","y":26.487975419999998},{"arrowcolor":"#296BEF","arrowhead":2,"arrowsize":1,"ax":30,"ay":-55,"bgcolor":"#F0F5FF","bordercolor":"#296BEF","borderwidth":1,"font":{"color":"#296BEF","size":10},"opacity":0.95,"showarrow":true,"text":"🔺 次高峰 59.6万\u003cbr\u003eROI=2.47 CVR=4.7%\u003cbr\u003eCPM=110 环比+116%\u003cbr\u003e计价率1.29偏高","x":"06\u002f03","y":64.625985551}],"title":{"font":{"size":18},"text":"倍宠日耗趋势 · 本期 vs 环比（14天）"},"xaxis":{"tickfont":{"size":11},"title":{"text":"日期"},"type":"category"},"yaxis":{"title":{"text":"消耗(万元)","font":{"size":13}},"tickformat":",.0f","range":[0,147.8754906345]},"yaxis2":{"title":{"text":"环比变化率(%)","font":{"size":13}},"overlaying":"y","side":"right","range":[-94.63800625522346,156.2562522532627],"tickformat":",.0f","gridcolor":"rgba(0,0,0,0.04)"},"legend":{"font":{"size":12},"orientation":"h","yanchor":"bottom","y":1.02,"xanchor":"center","x":0.5},"margin":{"t":100,"b":60},"barmode":"group","bargap":0.3,"bargroupgap":0.1,"hovermode":"x unified"},                        {"responsive": true}                    )                };            </script>        </div>
+  </div>
+
+  <div class="table-scroll">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>日期</th><th>本期消耗(万)</th><th>日期</th><th>环比消耗(万)</th><th>变化</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>05/25</td><td class="bold">63.1</td><td>05/11</td><td>32.3</td><td class="positive">+30.8</td></tr>
+      <tr><td>05/26</td><td class="bold">73.5</td><td>05/12</td><td>56.3</td><td class="positive">+17.2</td></tr>
+      <tr><td>05/27</td><td class="bold">40.2</td><td>05/13</td><td class="bold">109.5</td><td class="negative">-69.3</td></tr>
+      <tr><td>05/28</td><td class="bold">39.0</td><td>05/14</td><td>48.3</td><td class="negative">-9.3</td></tr>
+      <tr><td>05/29</td><td class="bold">21.5</td><td>05/15</td><td>55.0</td><td class="negative">-33.5</td></tr>
+      <tr><td>05/30</td><td class="bold">22.7</td><td>05/16</td><td>64.1</td><td class="negative">-41.4</td></tr>
+      <tr><td>05/31</td><td class="bold">22.6</td><td>05/17</td><td>61.0</td><td class="negative">-38.4</td></tr>
+      <tr><td>06/01</td><td class="bold">30.8</td><td>05/18</td><td>39.3</td><td class="negative">-8.5</td></tr>
+      <tr><td>06/02</td><td class="bold">39.2</td><td>05/19</td><td>26.1</td><td class="positive">+13.1</td></tr>
+      <tr><td>06/03</td><td class="bold">59.6</td><td>05/20</td><td>27.6</td><td class="positive">+32.0</td></tr>
+      <tr><td>06/04</td><td class="bold">33.2</td><td>05/21</td><td>15.4</td><td class="positive">+17.8</td></tr>
+      <tr><td>06/05</td><td class="bold">31.8</td><td>05/22</td><td>18.4</td><td class="positive">+13.4</td></tr>
+      <tr><td>06/06</td><td class="bold">25.3</td><td>05/23</td><td>18.9</td><td class="positive">+6.4</td></tr>
+      <tr><td>06/07</td><td class="bold">23.8</td><td>05/24</td><td>55.2</td><td class="negative">-31.4</td></tr>
+    </tbody>
+  </table>
+  </div>
+  
+  <div class="insight-box warn">
+    <div class="title">⚡ 日耗波动剧烈，峰值大幅下降</div>
+    本期日耗峰值73.5万(05/26)，环比期峰值109.5万(05/13)，峰值下降32.9%。<br>
+    本期前2天(05/25-26)日耗较高(63-74万)，之后迅速回落至20-40万区间，投放持续性不足。<br>
+    环比期05/13出现109.5万日耗峰值（大促节点），本期缺乏类似集中投放。
+  </div>
+</div>
+
+<!-- 三、出价分析 -->
+<div class="card">
+  <div class="card-title"><div class="icon"></div>三、出价分析</div>
+  
+  <div class="table-scroll">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>出价模式</th><th>本期消耗(万)</th><th>占比</th><th>环比消耗(万)</th><th>占比</th><th>变化</th><th>本期ROI</th><th>环比ROI</th><th>本期出价</th><th>环比出价</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="left bold">下单-下单ROI</td>
+        <td class="bold">397.1</td><td>75.5%</td>
+        <td>464.7</td><td>74.0%</td>
+        <td class="negative">-67.6万</td>
+        <td class="good">2.59</td><td>2.48</td>
+        <td>2.98</td><td>2.80</td>
+      </tr>
+      <tr>
+        <td class="left">下单(CPA)</td>
+        <td class="bold">118.0</td><td>22.4%</td>
+        <td>162.5</td><td>25.9%</td>
+        <td class="negative">-44.5万</td>
+        <td>2.49</td><td>2.33</td>
+        <td>87.6元</td><td>71.9元</td>
+      </tr>
+      <tr>
+        <td class="left">下单-辅助优化ROI</td>
+        <td>10.7</td><td>2.0%</td>
+        <td>0.3</td><td>0.1%</td>
+        <td class="positive">+10.4万</td>
+        <td>-</td><td>-</td>
+        <td>-</td><td>-</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+  
+  <div class="insight-box">
+    <div class="title">📊 出价策略：ROI出价上调6.5%，CPA出价上调22.2%</div>
+    ROI广告出价从2.80上调至2.98(+6.5%)，实际ROI从2.48提升至2.59，出价-ROI差值从0.32扩大至0.39，出价仍有空间。<br>
+    CPA广告出价从71.9元大幅上调至87.6元(+22.2%)，但消耗反而下降44.5万，说明CPA广告获量困难。<br>
+    新增"下单-辅助优化ROI"模式(10.7万)，是出价策略的新尝试。
+  </div>
+</div>
+
+<!-- 四、直播间分析 -->
+<div class="card">
+  <div class="card-title"><div class="icon"></div>四、直播间分析</div>
+  
+  <div class="table-scroll">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>直播间</th><th>本期消耗(万)</th><th>占比</th><th>环比消耗(万)</th><th>变化(万)</th><th>变化率</th><th>本期ROI</th><th>环比ROI</th><th>本期计价率</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="left bold">创维普澈家用电器</td>
+        <td class="bold">199.7</td><td>38.0%</td>
+        <td>101.4</td><td class="positive">+98.3</td><td class="positive">+96.9%</td>
+        <td class="good">2.64</td><td>2.41</td><td>1.116</td>
+      </tr>
+      <tr>
+        <td class="left">创维冷暖电器</td>
+        <td>46.4</td><td>8.8%</td>
+        <td>81.0</td><td class="negative">-34.6</td><td class="negative">-42.7%</td>
+        <td>2.56</td><td class="good">3.04</td><td>1.362</td>
+      </tr>
+      <tr>
+        <td class="left">康佳宁盈</td>
+        <td>44.3</td><td>8.4%</td>
+        <td>113.8</td><td class="negative">-69.5</td><td class="negative">-61.1%</td>
+        <td>2.24</td><td>2.33</td><td>1.170</td>
+      </tr>
+      <tr>
+        <td class="left" style="color:#296BEF">🆕 冠轩家用清洁电器</td>
+        <td>43.3</td><td>8.2%</td>
+        <td>0.3</td><td class="positive">+43.0</td><td class="positive">新增</td>
+        <td class="good">3.03</td><td>-</td><td>1.165</td>
+      </tr>
+      <tr>
+        <td class="left">康佳车载吸尘器</td>
+        <td>31.4</td><td>6.0%</td>
+        <td>133.9</td><td class="negative">-102.6</td><td class="negative">-76.6%</td>
+        <td>2.22</td><td>2.45</td><td>1.181</td>
+      </tr>
+      <tr>
+        <td class="left" style="color:#296BEF">🆕 冠轩生活电器</td>
+        <td>26.5</td><td>5.0%</td>
+        <td>0.1</td><td class="positive">+26.4</td><td class="positive">新增</td>
+        <td class="good">2.58</td><td>-</td><td>1.142</td>
+      </tr>
+      <tr>
+        <td class="left">荣暖生活电器</td>
+        <td>23.4</td><td>4.4%</td>
+        <td>20.3</td><td class="positive">+3.1</td><td class="positive">+15.3%</td>
+        <td class="good">3.48</td><td>2.97</td><td>1.070</td>
+      </tr>
+      <tr>
+        <td class="left">苏泊尔盾塑生活电器</td>
+        <td>19.3</td><td>3.7%</td>
+        <td>33.2</td><td class="negative">-13.9</td><td class="negative">-41.8%</td>
+        <td class="warn">1.85</td><td>1.93</td><td class="warn">1.375</td>
+      </tr>
+      <tr>
+        <td class="left">康佳家用生活电器</td>
+        <td>18.5</td><td>3.5%</td>
+        <td>8.3</td><td class="positive">+10.2</td><td class="positive">+123.3%</td>
+        <td class="warn">1.82</td><td>2.26</td><td>1.258</td>
+      </tr>
+      <tr>
+        <td class="left">创维5档空气循环扇</td>
+        <td>15.4</td><td>2.9%</td>
+        <td>7.5</td><td class="positive">+7.8</td><td class="positive">+104.1%</td>
+        <td>2.95</td><td>2.08</td><td>1.359</td>
+      </tr>
+      <tr style="background:#FFF7E6;">
+        <td class="left">康佳盾塑生活电器</td>
+        <td>10.3</td><td>2.0%</td>
+        <td>80.8</td><td class="negative">-70.4</td><td class="negative">-87.2%</td>
+        <td class="warn">2.00</td><td>2.00</td><td>1.214</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+  
+  <div class="insight-box success">
+    <div class="title">✅ 消耗结构重塑：创维普澈跃升为第一主力，新直播间表现亮眼</div>
+    创维普澈家用电器从环比期101.4万跃升至199.7万(+96.9%)，占比从16.2%提升至38.0%，成为绝对主力，ROI从2.41提升至2.64。<br>
+    新增冠轩家用清洁电器(43.3万/ROI=3.03)和冠轩生活电器(26.5万/ROI=2.58)，表现均优于大盘。<br>
+    荣暖生活电器ROI最高(3.48)，计价率最低(1.070)，效率标杆。
+  </div>
+  
+  <div class="insight-box danger">
+    <div class="title">⚠️ 风险直播间：康佳车载吸尘器大幅缩量，苏泊尔ROI持续低迷</div>
+    康佳车载吸尘器从133.9万骤降至31.4万(-76.6%)，是消耗下降的最大来源(-102.6万)。<br>
+    康佳盾塑从80.8万降至10.3万(-87.2%)，两个康佳直播间合计减投173万。<br>
+    苏泊尔盾塑ROI仅1.85，计价率1.375，持续低于大盘水平，需关注投放效率。
+  </div>
+</div>
+
+<!-- 五、品类分析 -->
+<div class="card">
+  <div class="card-title"><div class="icon"></div>五、品类结构分析</div>
+  
+  <div class="table-scroll">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>品类</th><th>本期消耗(万)</th><th>本期占比</th><th>环比消耗(万)</th><th>环比占比</th><th>变化(万)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="left bold">空气循环扇</td>
+        <td class="bold">305.5</td><td>58.1%</td>
+        <td>198.9</td><td>31.7%</td>
+        <td class="positive">+106.6</td>
+      </tr>
+      <tr>
+        <td class="left">车载吸尘器</td>
+        <td>75.6</td><td>14.4%</td>
+        <td class="bold">247.8</td><td>39.5%</td>
+        <td class="negative">-172.2</td>
+      </tr>
+      <tr>
+        <td class="left">蒸汽刷/挂烫机</td>
+        <td>49.1</td><td>9.3%</td>
+        <td>109.9</td><td>17.5%</td>
+        <td class="negative">-60.8</td>
+      </tr>
+      <tr>
+        <td class="left" style="color:#296BEF">🆕 果蔬清洗机</td>
+        <td>45.5</td><td>8.7%</td>
+        <td>0</td><td>0%</td>
+        <td class="positive">+45.5</td>
+      </tr>
+      <tr>
+        <td class="left">电动修脚器</td>
+        <td>19.3</td><td>3.7%</td>
+        <td>33.2</td><td>5.3%</td>
+        <td class="negative">-13.9</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+  
+  <div class="insight-box">
+    <div class="title">📊 品类轮动：从车载吸尘器转向空气循环扇，新品类拓展中</div>
+    空气循环扇从31.7%跃升至58.1%，成为绝对主力品类(+106.6万)，与季节性需求(夏季风扇旺季)吻合。<br>
+    车载吸尘器从39.5%骤降至14.4%(-172.2万)，是消耗下降的最大品类来源。<br>
+    新增果蔬清洗机品类(45.5万/8.7%)，拓展了厨房小电赛道。<br>
+    挂烫机从17.5%降至9.3%(-60.8万)，非季节性品类收缩明显。
+  </div>
+</div>
+
+<!-- 六、版位分析 -->
+<div class="card">
+  <div class="card-title"><div class="icon"></div>六、版位分析</div>
+  
+  <div class="table-scroll">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>版位</th><th>本期消耗(万)</th><th>占比</th><th>环比消耗(万)</th><th>占比</th><th>变化(万)</th><th>本期ROI</th><th>环比ROI</th><th>本期CTR</th><th>本期CVR</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="left bold">微信视频号</td>
+        <td class="bold">285.2</td><td>54.2%</td>
+        <td>395.2</td><td>63.0%</td>
+        <td class="negative">-110.0</td>
+        <td class="good">2.66</td><td>2.56</td><td>3.32%</td><td class="warn">5.09%</td>
+      </tr>
+      <tr>
+        <td class="left">平台与内容广告</td>
+        <td>110.2</td><td>21.0%</td>
+        <td>101.7</td><td>16.2%</td>
+        <td class="positive">+8.5</td>
+        <td class="good">2.59</td><td>2.28</td><td>4.73%</td><td>4.97%</td>
+      </tr>
+      <tr>
+        <td class="left">微信小程序</td>
+        <td>65.5</td><td>12.5%</td>
+        <td>55.8</td><td>8.9%</td>
+        <td class="positive">+9.8</td>
+        <td>2.38</td><td>2.12</td><td>4.28%</td><td>4.54%</td>
+      </tr>
+      <tr>
+        <td class="left">微信公众号</td>
+        <td>26.5</td><td>5.0%</td>
+        <td>40.7</td><td>6.5%</td>
+        <td class="negative">-14.2</td>
+        <td>2.59</td><td>2.58</td><td>3.39%</td><td>5.60%</td>
+      </tr>
+      <tr>
+        <td class="left">微信朋友圈</td>
+        <td>24.4</td><td>4.6%</td>
+        <td>18.7</td><td>3.0%</td>
+        <td class="positive">+5.7</td>
+        <td class="warn">2.22</td><td>1.87</td><td class="warn">0.94%</td><td class="warn">2.77%</td>
+      </tr>
+      <tr>
+        <td class="left">移动联盟</td>
+        <td>8.5</td><td>1.6%</td>
+        <td>9.6</td><td>1.5%</td>
+        <td class="negative">-1.1</td>
+        <td class="warn">1.59</td><td>1.83</td><td>3.48%</td><td class="warn">0.61%</td>
+      </tr>
+      <tr>
+        <td class="left">搜索广告</td>
+        <td>5.5</td><td>1.0%</td>
+        <td>5.9</td><td>0.9%</td>
+        <td class="negative">-0.4</td>
+        <td>2.50</td><td>2.13</td><td>2.95%</td><td>2.25%</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+  
+  <div class="insight-box warn">
+    <div class="title">⚡ 视频号缩量是消耗下降主因，CVR下滑需关注</div>
+    微信视频号消耗从395.2万降至285.2万(-27.8%)，贡献了本期消耗下降量的72%。<br>
+    视频号CVR从6.02%降至5.09%，CTR从3.01%提升至3.32%，说明素材吸引力提升但转化效率下降。<br>
+    平台与内容广告(+8.5万)和小程序(+9.8万)增量弥补了部分缺口，ROI均优于环比期。
+  </div>
+</div>
+
+<!-- 七、智投分析 -->
+<div class="card">
+  <div class="card-title"><div class="icon"></div>七、智投工具分析</div>
+  
+  <div class="table-scroll">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>智投类型</th><th>本期消耗(万)</th><th>占比</th><th>环比消耗(万)</th><th>占比</th><th>变化(万)</th><th>本期ROI</th><th>环比ROI</th><th>本期计价率</th><th>本期CTR</th><th>本期CVR</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="left bold">单链路智投</td>
+        <td class="bold">292.0</td><td>55.5%</td>
+        <td>318.7</td><td>50.8%</td>
+        <td class="negative">-26.7</td>
+        <td>2.53</td><td>2.48</td><td>1.245</td><td>3.58%</td><td class="warn">3.16%</td>
+      </tr>
+      <tr>
+        <td class="left">非智投广告</td>
+        <td>141.3</td><td>26.9%</td>
+        <td>218.4</td><td>34.8%</td>
+        <td class="negative">-77.1</td>
+        <td>2.42</td><td>2.41</td><td class="warn">1.325</td><td>2.92%</td><td class="warn">3.35%</td>
+      </tr>
+      <tr>
+        <td class="left" style="color:#296BEF">全域通直播</td>
+        <td>92.1</td><td>17.5%</td>
+        <td>87.5</td><td>13.9%</td>
+        <td class="positive">+4.6</td>
+        <td class="good">2.89</td><td>2.41</td><td class="good">0.981</td><td>2.14%</td><td>4.40%</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+  
+  <div class="insight-box success">
+    <div class="title">✅ 全域通直播效率最优，占比提升</div>
+    全域通直播ROI=2.89，计价率=0.981（唯一低于1的工具），是效率最高的智投工具。<br>
+    全域通消耗从87.5万增至92.1万(+5.3%)，占比从13.9%提升至17.5%，结构优化方向正确。
+  </div>
+  
+  <div class="insight-box warn">
+    <div class="title">⚡ 非智投广告大幅缩量，单链路CVR下滑明显</div>
+    非智投广告从218.4万降至141.3万(-35.3%)，是消耗下降的第二大来源，计价率1.325偏高。<br>
+    单链路智投CVR从4.01%降至3.16%，需排查是否因品类切换（循环扇CVR低于吸尘器）导致。
+  </div>
+</div>
+
+<!-- 八、商品分析 -->
+<div class="card">
+  <div class="card-title"><div class="icon"></div>八、商品分析(Top10)</div>
+  
+  <div class="table-scroll">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>商品</th><th>本期消耗(万)</th><th>环比消耗(万)</th><th>变化(万)</th><th>本期ROI</th><th>本期CVR</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="left bold">创维空气循环扇静享驱蚊</td>
+        <td class="bold">191.5</td><td>56.3</td><td class="positive">+135.2</td>
+        <td class="good">2.64</td><td>4.95%</td>
+      </tr>
+      <tr>
+        <td class="left">康佳无线车载吸尘器A</td>
+        <td>56.2</td><td class="bold">209.5</td>
+        <td class="negative">-153.3</td>
+        <td>2.22</td><td>7.78%</td>
+      </tr>
+      <tr>
+        <td class="left">创维驱蚊空气循环扇2026</td>
+        <td>42.4</td><td>77.6</td>
+        <td class="negative">-35.1</td>
+        <td>2.56</td><td>6.13%</td>
+      </tr>
+      <tr>
+        <td class="left" style="color:#296BEF">🆕 苏泊尔果蔬清洗机</td>
+        <td>42.2</td><td>0</td>
+        <td class="positive">+42.2</td>
+        <td>2.47</td><td>4.51%</td>
+      </tr>
+      <tr>
+        <td class="left" style="color:#296BEF">🆕 创维桌面净化循环扇</td>
+        <td>25.9</td><td>0</td>
+        <td class="positive">+25.9</td>
+        <td>2.68</td><td>3.89%</td>
+      </tr>
+      <tr>
+        <td class="left">海尔手持熨烫机</td>
+        <td>19.8</td><td>13.5</td>
+        <td class="positive">+6.3</td>
+        <td class="good">3.36</td><td>5.59%</td>
+      </tr>
+      <tr>
+        <td class="left" style="color:#296BEF">🆕 苏泊尔电动磨脚器</td>
+        <td>19.2</td><td>0</td>
+        <td class="positive">+19.2</td>
+        <td>1.85</td><td>7.22%</td>
+      </tr>
+      <tr>
+        <td class="left">康佳无线车载吸尘器(另一款)</td>
+        <td>16.4</td><td>25.7</td>
+        <td class="negative">-9.4</td>
+        <td>2.37</td><td>7.78%</td>
+      </tr>
+      <tr>
+        <td class="left" style="color:#296BEF">🆕 康佳无线除螨仪</td>
+        <td>13.7</td><td>0</td>
+        <td class="positive">+13.7</td>
+        <td>2.24</td><td>4.97%</td>
+      </tr>
+      <tr>
+        <td class="left" style="color:#296BEF">🆕 创维空气循环扇s款</td>
+        <td>12.3</td><td>0</td>
+        <td class="positive">+12.3</td>
+        <td>2.59</td><td>4.82%</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+  
+  <div class="insight-box">
+    <div class="title">📊 商品轮动：循环扇品类集中度提升，车载吸尘器退坡</div>
+    创维空气循环扇静享驱蚊款从56.3万跃升至191.5万(+135.2万)，成为第一大单品，ROI=2.64表现稳健。<br>
+    康佳车载吸尘器从209.5万降至56.2万(-153.3万)，是消耗下降的最大单品来源。<br>
+    新增5款商品(果蔬清洗机/桌面循环扇/磨脚器/除螨仪/s款循环扇)，合计113.3万，拓展了品类宽度。
+  </div>
+</div>
+
+<!-- 九、大盘对标 -->
+<div class="card">
+  <div class="card-title"><div class="icon"></div>九、大盘对标（家电数码组 · 白牌 · 直播）</div>
+  
+  <div class="table-scroll">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>指标</th><th>倍宠本期</th><th>倍宠环比变化</th><th>大盘本期</th><th>大盘环比变化</th><th>倍宠 vs 大盘</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="left bold">消耗</td>
+        <td>526.1万</td><td class="warn">-16.2%</td>
+        <td>3,999.6万</td><td class="good">+20.9%</td>
+        <td><span class="tag red">显著弱于大盘</span></td>
+      </tr>
+      <tr>
+        <td class="left bold">ROI</td>
+        <td>2.56</td><td class="good">+5.0%</td>
+        <td>2.72</td><td class="warn">-8.0%</td>
+        <td><span class="tag green">优于大盘趋势</span></td>
+      </tr>
+      <tr>
+        <td class="left bold">CPM</td>
+        <td>89.35</td><td class="good">-7.8%</td>
+        <td>62.34</td><td>-4.1%</td>
+        <td><span class="tag orange">CPM偏高但降幅更大</span></td>
+      </tr>
+      <tr>
+        <td class="left bold">CTR</td>
+        <td>3.05%</td><td class="good">+11.8%</td>
+        <td>2.40%</td><td class="warn">-13.4%</td>
+        <td><span class="tag green">显著优于大盘</span></td>
+      </tr>
+      <tr>
+        <td class="left bold">CVR</td>
+        <td>3.42%</td><td class="warn">-25.2%</td>
+        <td>4.69%</td><td class="good">+8.8%</td>
+        <td><span class="tag red">显著弱于大盘</span></td>
+      </tr>
+      <tr>
+        <td class="left bold">计价率</td>
+        <td>1.151</td><td>+1.8%</td>
+        <td>1.102</td><td>-0.3%</td>
+        <td><span class="tag orange">高于大盘</span></td>
+      </tr>
+      <tr>
+        <td class="left bold">客单价</td>
+        <td>219.83</td><td>+15.9%</td>
+        <td>170.23</td><td>-3.1%</td>
+        <td><span class="tag blue">高于大盘</span></td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+  
+  <div class="insight-box danger">
+    <div class="title">⚠️ 与大盘走势显著背离：消耗缩量+CVR下滑是核心差距</div>
+    <b>消耗：</b>大盘增长20.9%，倍宠下降16.2%，差距37.1个百分点。客户在大盘扩量期反而收缩投放，需关注客户预算分配和信心。<br>
+    <b>CVR：</b>大盘CVR上升8.8%至4.69%，倍宠CVR下降25.2%至3.42%，差距1.27个百分点。品类切换（高CVR吸尘器→低CVR循环扇）是主因。<br>
+    <b>CTR：</b>倍宠CTR=3.05%高于大盘2.40%，且环比提升11.8%（大盘降13.4%），素材竞争力强。<br>
+    <b>ROI：</b>倍宠ROI=2.56低于大盘2.72，但趋势优于大盘（+5.0% vs -8.0%），若CVR改善则有追赶空间。
+  </div>
+</div>
+
+<!-- 十、核心结论与建议 -->
+<div class="card">
+  <div class="card-title"><div class="icon"></div>十、核心结论与执行建议</div>
+  
+  <div class="insight-box danger">
+    <div class="title">🔴 核心问题：消耗逆势缩量 + CVR大幅下滑</div>
+    <b>1. 消耗缩量与大盘背离：</b>大盘白牌直播消耗增长20.9%，倍宠下降16.2%，主要因康佳车载吸尘器(-102.6万)和康佳盾塑(-70.4万)大幅减投。<br>
+    <b>2. CVR骤降25.2%：</b>从4.57%降至3.42%，远低于大盘4.69%。品类轮动（吸尘器CVR 7.78% → 循环扇CVR 4-5%）是结构性原因，但同品类内CVR也在下滑。<br>
+    <b>3. 计价率偏高：</b>1.151高于大盘1.102，ROI天花板受限。
+  </div>
+  
+  <div class="insight-box success">
+    <div class="title">🟢 积极信号：CTR提升 + 全域通效率优化 + 新直播间拓展</div>
+    <b>1. CTR提升11.8%：</b>素材竞争力增强，3.05%高于大盘2.40%，是效率改善的核心驱动力。<br>
+    <b>2. 全域通直播效率最优：</b>ROI=2.89，计价率=0.981，占比从13.9%提升至17.5%，方向正确。<br>
+    <b>3. 新直播间/新品类拓展：</b>冠轩清洁电器(ROI=3.03)、果蔬清洗机等新方向表现良好。
+  </div>
+  
+  <div class="insight-box">
+    <div class="title">📋 执行建议</div>
+    <b>【短期-提升CVR】</b><br>
+    ① 循环扇品类优化直播间话术和商品详情页，提升从点击到下单的转化效率，目标CVR从4-5%提升至5-6%<br>
+    ② 苏泊尔盾塑(ROI=1.85/计价率=1.375)和康佳家用(ROI=1.82)效率偏低，建议降低出价或暂停低效广告<br>
+    <br>
+    <b>【中期-扩量策略】</b><br>
+    ③ 全域通直播继续加量，当前ROI=2.89/计价率=0.981，是效率最优工具，建议占比提升至25%+<br>
+    ④ 车载吸尘器品类恢复投放测试，该品类CVR=7.78%远高于循环扇，可考虑ROI出价适度上调至2.5-2.8获量<br>
+    ⑤ 新品类果蔬清洗机(42.2万/ROI=2.47)持续观察，若ROI稳定可加大投入<br>
+    <br>
+    <b>【长期-基建优化】</b><br>
+    ⑥ 非智投广告计价率1.325偏高，建议逐步迁移至智投工具（全域通/单链路），降低人工操作成本<br>
+    ⑦ 创维普澈作为第一主力(38.0%)，集中度过高，建议培育2-3个次主力直播间分散风险
+  </div>
+</div>
+
+<!-- Footer -->
+<div class="footer">
+  倍宠 · 直播间维度复盘报告 | 本期：2026/05/25-06/07 环比：2026/05/11-05/24 | 对标：家电数码组·白牌·直播<br>
+  报告生成时间：2026年6月8日 | 数据来源：AMS经营数仓
+</div>
+
+</div>
+<script>(function(){var _h=0,_t;function s(){var h=document.documentElement.scrollHeight;if(h>0&&h!==_h){_h=h;window.parent.postMessage({type:"iframe-resize",height:h},"*")}}function d(){clearTimeout(_t);_t=setTimeout(s,150)}if(document.readyState==="complete")s();else window.addEventListener("load",s);if(typeof ResizeObserver!=="undefined")new ResizeObserver(d).observe(document.documentElement)})();</script></body>
+</html>
