@@ -44,6 +44,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei
 .card.soon::before{background:linear-gradient(180deg,#cbd5e1,#e2e8f0);}
 .card.soon .period{color:var(--muted); background:#f1f5f9;}
 .card.soon .badge-soon{background:#f1f5f9; color:var(--muted); padding:3px 10px; border-radius:6px; font-size:12px; font-weight:600;}
+.card.monitor{border-color:#c7d9f0; background:linear-gradient(135deg,#f0f7ff 0%,#ffffff 100%);}
+.card.monitor::before{background:linear-gradient(180deg,#3b82f6,#06b6d4);}
+.card.monitor .period{color:#0891b2; background:#e0f7fa;}
+.card.monitor .go{color:#0891b2;}
 .footer{text-align:center; color:var(--muted); font-size:12px; margin-top:48px; padding:0 20px;}
 @media(max-width:560px){ .hero h1{font-size:22px} .hero{padding:42px 18px 52px} }
 </style>
@@ -58,20 +62,22 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei
 <div class="wrap">
   <div class="section-title">复盘报告</div>
   <div class="grid" id="grid"></div>
+
+  <div class="section-title">日常监控</div>
+  <div class="grid">
+    <a class="card monitor" href="https://yaqichen03-dotcom.github.io/juliang-report/" target="_blank" rel="noopener noreferrer">
+      <span class="period">每日更新</span>
+      <h3>📊 每日监控看板</h3>
+      <div class="desc">实时追踪投放消耗、掉量预警、重点客户日维度数据，支持每日追击与归因复盘。</div>
+      <div class="foot"><span>数据每日自动刷新</span><span class="go">打开看板</span></div>
+    </a>
+  </div>
+
   <div class="footer">如需数据说明或补充分析，请随时联系投放团队 · 报告仅供聚量内部与合作方参考</div>
 </div>
 
 <script>
 const REPORTS = [
-  {
-    period: "2026 · 6月",
-    title: "6月下旬双周复盘",
-    range: "6/17 ~ 6/30",
-    desc: "近双周量级上台阶（26→38.8万，+49%），聚焦头部直播间异动、人货场深拆与提量打法。",
-    url: "2026-06/",
-    date: "2026-07-01 更新",
-    ready: true
-  },
   {
     period: "2026 · 5月",
     title: "倍宠 · 直播间维度复盘",
@@ -79,6 +85,15 @@ const REPORTS = [
     desc: "客户维度直播间复盘：本期日均消耗 37.6 万（环比 −16.2%），聚焦 CVR 下滑归因与直播间人货场打法。",
     url: "2026-05/",
     date: "2026-06-08 更新",
+    ready: true
+  },
+  {
+    period: "2026 · 6月",
+    title: "6月下旬双周复盘",
+    range: "6/17 ~ 6/30",
+    desc: "近双周量级上台阶（26→38.8万，+49%），聚焦头部直播间异动、人货场深拆与提量打法。",
+    url: "2026-06/",
+    date: "2026-07-01 更新",
     ready: true
   },
   {
